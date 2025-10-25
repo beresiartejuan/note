@@ -33,9 +33,6 @@ export class Writer {
     /** Clipboard interno para copiar/pegar */
     private clipboard: string = '';
 
-    /** Estado de selección [inicio, fin] donde cada posición es [blockIndex, contentIndex, charIndex] */
-    private selection: [CursorPosition, CursorPosition] | null = null;
-
     constructor(container: HTMLElement) {
         this.container = container;
         this.container.innerHTML = "";

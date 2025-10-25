@@ -221,6 +221,9 @@ p.line-break {
     min-height: 1.5em;
     margin: 0.25em 0;
     line-height: 1.5;
+    /* Asegurar que sea clickeable */
+    cursor: text;
+    position: relative;
 }
 
 /* Párrafos vacíos también necesitan altura mínima */
@@ -231,4 +234,27 @@ p:empty {
 /* Mejorar visualización de párrafos con solo espacios */
 p {
     min-height: 1.5em;
+}
+
+/* Estilos para bloques clickeables */
+#app {
+    cursor: text;
+}
+
+/* Mejorar feedback visual en hover para elementos interactivos */
+p:hover, h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover,
+li:hover, blockquote:hover, pre:hover {
+    background-color: rgba(240, 97, 14, 0.05);
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+}
+
+/* Asegurar que el cursor se muestre correctamente en todos los elementos */
+* {
+    cursor: inherit;
+}
+
+/* Elementos que no deben ser clickeables */
+img, .cursor {
+    cursor: default;
 }

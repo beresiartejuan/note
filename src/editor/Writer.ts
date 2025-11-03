@@ -658,7 +658,7 @@ export class Writer {
     /**
      * Convierte todo el documento a texto plano markdown
      */
-    private getDocumentAsText(): string {
+    public getDocumentAsText(): string {
         return this.content.map(block => this.blockToMarkdown(block)).join('\n');
     }
 

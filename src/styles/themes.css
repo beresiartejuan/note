@@ -1,0 +1,74 @@
+/* Variables CSS para diferentes temas del editor */
+
+:root {
+  /* Tema Oscuro (por defecto) */
+  --bg-primary: #363946;
+  --bg-secondary: #2a2d3a;
+  --bg-tertiary: #4a4d5a;
+  --text-primary: #FDFFFC;
+  --text-secondary: #B8BCC8;
+  --accent-primary: #f0610e;
+  --accent-secondary: #ED1C24;
+  --accent-tertiary: #4A90E2;
+  --accent-quaternary: #7EC699;
+  --border-color: #4a4d5a;
+  --shadow-color: rgba(0, 0, 0, 0.2);
+  --overlay-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Tema Claro */
+body.theme-light {
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F8F9FA;
+  --bg-tertiary: #E9ECEF;
+  --text-primary: #2C3E50;
+  --text-secondary: #6C757D;
+  --accent-primary: #3498DB;
+  --accent-secondary: #E74C3C;
+  --accent-tertiary: #9B59B6;
+  --accent-quaternary: #27AE60;
+  --border-color: #DEE2E6;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --overlay-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Tema Sepia */
+body.theme-sepia {
+  --bg-primary: #F4F1E8;
+  --bg-secondary: #E8E2D5;
+  --bg-tertiary: #D4C4A8;
+  --text-primary: #5D4E37;
+  --text-secondary: #8B7355;
+  --accent-primary: #8B4513;
+  --accent-secondary: #A0522D;
+  --accent-tertiary: #CD853F;
+  --accent-quaternary: #6B8E23;
+  --border-color: #D2B48C;
+  --shadow-color: rgba(139, 69, 19, 0.15);
+  --overlay-color: rgba(93, 78, 55, 0.6);
+}
+
+/* Tema Alto Contraste */
+body.theme-high-contrast {
+  --bg-primary: #000000;
+  --bg-secondary: #1A1A1A;
+  --bg-tertiary: #333333;
+  --text-primary: #FFFFFF;
+  --text-secondary: #CCCCCC;
+  --accent-primary: #FFD700;
+  --accent-secondary: #FF6B6B;
+  --accent-tertiary: #4ECDC4;
+  --accent-quaternary: #45B7D1;
+  --border-color: #666666;
+  --shadow-color: rgba(255, 255, 255, 0.2);
+  --overlay-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Transiciones suaves para cambios de tema */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}

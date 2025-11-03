@@ -4,9 +4,13 @@
  */
 
 import 'normalize.css';
+import './styles/themes.css';
 import './style.css';
 
 import { Writer } from './editor/Writer.js';
+import { ConfigButton } from './ui/ConfigButton.js';
+import { ConfigModal } from './ui/ConfigModal.js';
+import { ThemeManager } from './ui/ThemeManager.js';
 
 /**
  * Inicialización de la aplicación
@@ -29,6 +33,18 @@ const writer = new Writer(app);
 // Nota: Usamos window para capturar todos los eventos de teclado,
 // independientemente de qué elemento tenga el foco
 window.addEventListener("keydown", writer.onPressKey);
+
+// Inicializar sistema de configuración
+const themeManager = new ThemeManager();
+const configModal = new ConfigModal(themeManager);
+const configButton = new ConfigButton();
+
+// Configurar callbacks
+configModal.onGetContent(() => writer.getDocumentAsText());
+configButton.onClick(() => configModal.show());
+
+// Mostrar botón flotante
+configButton.show();
 
 /**
  * Opcional: Configurar otros event listeners para funcionalidad adicional

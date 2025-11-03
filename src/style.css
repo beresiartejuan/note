@@ -55,18 +55,21 @@
 }
 
 body {
-    background-color: #363946;
-    color: #FDFFFC;
+    padding: 0;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 #app {
     max-width: 1000px;
+    min-height: calc(min(100%, 90vh));
     margin: 0 auto;
-    padding: 20px;
+    padding: 2rem 0;
     font-size: 20px;
     line-height: 1.5;
     white-space: pre-wrap;
+    background-color: var(--bg-primary);
 }
 
 .cursor {
@@ -92,12 +95,12 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.2;
 }
 
-h1 { font-size: 2.5em; color: #f0610e; }
-h2 { font-size: 2em; color: #f0610e; }
-h3 { font-size: 1.5em; color: #f0610e; }
-h4 { font-size: 1.25em; color: #f0610e; }
-h5 { font-size: 1.1em; color: #f0610e; }
-h6 { font-size: 1em; color: #f0610e; }
+h1 { font-size: 2.5em; color: var(--accent-primary); }
+h2 { font-size: 2em; color: var(--accent-primary); }
+h3 { font-size: 1.5em; color: var(--accent-primary); }
+h4 { font-size: 1.25em; color: var(--accent-primary); }
+h5 { font-size: 1.1em; color: var(--accent-primary); }
+h6 { font-size: 1em; color: var(--accent-primary); }
 
 p {
     margin: 0.5em 0;
@@ -105,17 +108,17 @@ p {
 
 strong {
     font-weight: 700;
-    color: #ED1C24;
+    color: var(--accent-secondary);
 }
 
 em {
     font-style: italic;
-    color: #4A90E2;
+    color: var(--accent-tertiary);
 }
 
 code {
-    background-color: #2a2d3a;
-    color: #7EC699;
+    background-color: var(--bg-secondary);
+    color: var(--accent-quaternary);
     padding: 2px 4px;
     border-radius: 3px;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
@@ -123,8 +126,8 @@ code {
 }
 
 pre {
-    background-color: #2a2d3a;
-    border: 1px solid #4a4d5a;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 5px;
     padding: 1em;
     margin: 1em 0;
@@ -135,19 +138,19 @@ pre code {
     background: none;
     padding: 0;
     font-size: 0.9em;
-    color: #7EC699;
+    color: var(--accent-quaternary);
 }
 
 blockquote {
-    border-left: 4px solid #f0610e;
+    border-left: 4px solid var(--accent-primary);
     padding-left: 1em;
     margin: 1em 0;
     font-style: italic;
-    color: #B8BCC8;
+    color: var(--text-secondary);
 }
 
 a {
-    color: #4A90E2;
+    color: var(--accent-tertiary);
     text-decoration: none;
 }
 
@@ -244,7 +247,7 @@ p {
 /* Mejorar feedback visual en hover para elementos interactivos */
 p:hover, h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover,
 li:hover, blockquote:hover, pre:hover {
-    background-color: rgba(240, 97, 14, 0.05);
+    background-color: color-mix(in srgb, var(--accent-primary) 5%, transparent);
     border-radius: 3px;
     transition: background-color 0.2s ease;
 }
@@ -257,4 +260,304 @@ li:hover, blockquote:hover, pre:hover {
 /* Elementos que no deben ser clickeables */
 img, .cursor {
     cursor: default;
+}
+
+/* ================================
+   BOTÓN FLOTANTE DE CONFIGURACIÓN
+   ================================ */
+
+.config-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--accent-primary);
+    color: var(--text-primary);
+    border: none;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+.config-button:hover {
+    background: var(--accent-secondary);
+    box-shadow: 0 6px 16px var(--shadow-color);
+    transform: scale(1.1);
+}
+
+.config-button:active {
+    transform: scale(0.95);
+}
+
+.config-button svg {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.3s ease;
+}
+
+.config-button:hover svg {
+    transform: rotate(90deg);
+}
+
+/* ================================
+   MODAL DE CONFIGURACIÓN
+   ================================ */
+
+.config-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--overlay-color);
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+.config-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.config-modal {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow: hidden;
+    transform: translateY(50px) scale(0.9);
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.config-modal.show {
+    transform: translateY(0) scale(1);
+}
+
+.config-modal-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Header del modal */
+.config-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+}
+
+.config-modal-header h2 {
+    margin: 0;
+    font-size: 1.5em;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.config-modal-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.config-modal-close:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+/* Cuerpo del modal */
+.config-modal-body {
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.config-section {
+    margin-bottom: 32px;
+}
+
+.config-section:last-child {
+    margin-bottom: 0;
+}
+
+.config-section h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.config-section p {
+    margin: 0 0 16px 0;
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+
+/* Botones del modal */
+.config-button-primary,
+.config-button-secondary {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.95em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    display: inline-block;
+}
+
+/* Contenedor de botones de descarga */
+.download-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.download-buttons .config-button-primary {
+    flex: 1;
+    min-width: 200px;
+}
+
+.config-button-primary {
+    background: var(--accent-primary);
+    color: var(--text-primary);
+}
+
+.config-button-primary:hover:not(:disabled) {
+    background: var(--accent-secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.config-button-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.config-button-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.config-button-secondary:hover {
+    background: var(--bg-secondary);
+}
+
+/* Selector de temas */
+.theme-selector {
+    display: grid;
+    gap: 12px;
+}
+
+.theme-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 16px;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    transition: all 0.2s ease;
+    background: var(--bg-secondary);
+}
+
+.theme-option:hover {
+    border-color: var(--accent-primary);
+    background: var(--bg-tertiary);
+}
+
+.theme-option input[type="radio"] {
+    margin-right: 12px;
+    accent-color: var(--accent-primary);
+}
+
+.theme-label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.theme-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.theme-description {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+}
+
+.theme-option:has(input:checked) {
+    border-color: var(--accent-primary);
+    background: var(--accent-primary);
+    color: var(--text-primary);
+}
+
+.theme-option:has(input:checked) .theme-name,
+.theme-option:has(input:checked) .theme-description {
+    color: var(--text-primary);
+}
+
+/* Footer del modal */
+.config-modal-footer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .config-modal {
+        width: 95%;
+        margin: 20px;
+    }
+    
+    .config-modal-header,
+    .config-modal-body,
+    .config-modal-footer {
+        padding: 16px;
+    }
+    
+    .config-button {
+        width: 50px;
+        height: 50px;
+        bottom: 16px;
+        right: 16px;
+    }
+    
+    .config-button svg {
+        width: 20px;
+        height: 20px;
+    }
 }

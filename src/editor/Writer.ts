@@ -15,6 +15,9 @@ import {
 } from './textOperations.js';
 import { tryAutoConvertMarkdown } from './blockConverter.js';
 import { updateDisplay } from './display.js';
+import { ViewManager, type ViewMode } from '../ui/ViewManager.js';
+import { PlainTextEditor } from '../ui/PlainTextEditor.js';
+import { blocksToMarkdown, markdownToBlocks } from '../utils/markdownConverter.js';
 
 /**
  * Clase principal del editor de markdown
@@ -33,12 +36,87 @@ export class Writer {
     /** Clipboard interno para copiar/pegar */
     private clipboard: string = '';
 
+    /** Gestor de vistas del editor */
+    private viewManager!: ViewManager;
+
+    /** Editor de texto plano */
+    private plainTextEditor!: PlainTextEditor;
+
+    /** Contenedor específico para la vista renderizada */
+    private renderedContainer!: HTMLElement;
+
     constructor(container: HTMLElement) {
         this.container = container;
-        this.container.innerHTML = "";
+        this.setupContainers();
+        this.setupViewManager();
+        this.setupPlainTextEditor();
         this.initializeWithEmptyParagraph();
         this.setupDragAndDrop();
         this.setupClickableBlocks();
+    }
+
+    /**
+     * Configura los contenedores para las diferentes vistas
+     */
+    private setupContainers(): void {
+        this.container.innerHTML = "";
+
+        // Crear contenedor específico para la vista renderizada
+        this.renderedContainer = document.createElement('div');
+        this.renderedContainer.className = 'rendered-editor-container';
+        this.container.appendChild(this.renderedContainer);
+    }
+
+    /**
+     * Configura el gestor de vistas
+     */
+    private setupViewManager(): void {
+        this.viewManager = new ViewManager();
+        this.viewManager.onViewChange((mode: ViewMode) => {
+            this.handleViewChange(mode);
+        });
+        this.viewManager.show();
+    }
+
+    /**
+     * Configura el editor de texto plano
+     */
+    private setupPlainTextEditor(): void {
+        this.plainTextEditor = new PlainTextEditor(this.container);
+        this.plainTextEditor.onContentChange((markdown: string) => {
+            this.handlePlainTextChange(markdown);
+        });
+    }
+
+    /**
+     * Maneja el cambio entre vistas
+     */
+    private handleViewChange(mode: ViewMode): void {
+        if (mode === 'plain') {
+            // Cambiar a vista de texto plano
+            const currentMarkdown = blocksToMarkdown(this.content);
+            this.plainTextEditor.setContent(currentMarkdown);
+            this.renderedContainer.style.display = 'none';
+            this.plainTextEditor.show();
+        } else {
+            // Cambiar a vista renderizada
+            const plainText = this.plainTextEditor.getContent();
+            if (plainText.trim()) {
+                this.content = markdownToBlocks(plainText);
+                this.updateDisplay();
+            }
+            this.plainTextEditor.hide();
+            this.renderedContainer.style.display = 'block';
+        }
+    }
+
+    /**
+     * Maneja cambios en el editor de texto plano
+     */
+    private handlePlainTextChange(markdown: string): void {
+        // Actualizar la estructura de bloques en segundo plano
+        // pero no cambiar la vista hasta que el usuario cambie de vista
+        this.content = markdownToBlocks(markdown);
     }
 
     /**
@@ -55,23 +133,23 @@ export class Writer {
      * Permite insertar imágenes arrastrándolas desde el explorador de archivos
      */
     private setupDragAndDrop(): void {
-        // Prevenir el comportamiento por defecto en toda el área del editor
-        this.container.addEventListener('dragover', (e) => {
+        // Prevenir el comportamiento por defecto en toda el área del editor renderizado
+        this.renderedContainer.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            this.container.style.backgroundColor = '#4a4d5a';
+            this.renderedContainer.style.backgroundColor = '#4a4d5a';
         });
 
-        this.container.addEventListener('dragleave', (e) => {
+        this.renderedContainer.addEventListener('dragleave', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            this.container.style.backgroundColor = '';
+            this.renderedContainer.style.backgroundColor = '';
         });
 
-        this.container.addEventListener('drop', (e) => {
+        this.renderedContainer.addEventListener('drop', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            this.container.style.backgroundColor = '';
+            this.renderedContainer.style.backgroundColor = '';
 
             const files = Array.from(e.dataTransfer?.files || []);
             const imageFiles = files.filter(file => file.type.startsWith('image/'));
@@ -87,7 +165,7 @@ export class Writer {
      * Permite al usuario posicionar el cursor haciendo click en cualquier parte del contenido
      */
     private setupClickableBlocks(): void {
-        this.container.addEventListener('click', (e) => {
+        this.renderedContainer.addEventListener('click', (e) => {
             // No prevenir el comportamiento por defecto inmediatamente
             // para permitir que el click funcione en todos los elementos
             this.handleClick(e);
@@ -108,7 +186,7 @@ export class Writer {
         if (!blockElement) return;
 
         // Obtener todos los elementos de bloque del contenedor
-        const blockElements = this.container.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, blockquote, pre');
+        const blockElements = this.renderedContainer.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, blockquote, pre');
         const blockIndex = Array.from(blockElements).indexOf(blockElement);
 
         if (blockIndex === -1) return;
@@ -142,7 +220,7 @@ export class Writer {
     private findBlockElement(element: HTMLElement): HTMLElement | null {
         let current = element;
 
-        while (current && current !== this.container) {
+        while (current && current !== this.renderedContainer) {
             // Verificar si es un elemento de bloque que reconocemos
             if (current.matches('p, h1, h2, h3, h4, h5, h6, li, blockquote, pre')) {
                 return current;
@@ -152,7 +230,7 @@ export class Writer {
 
         // Si no encontramos un bloque, pero el click fue directamente en el contenedor,
         // buscar el bloque más cercano al punto de click
-        if (current === this.container) {
+        if (current === this.renderedContainer) {
             return this.findNearestBlockElement(element);
         }
 
@@ -163,7 +241,7 @@ export class Writer {
      * Encuentra el bloque más cercano al elemento clickeado cuando el click fue en el contenedor
      */
     private findNearestBlockElement(clickedElement: HTMLElement): HTMLElement | null {
-        const blockElements = this.container.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, blockquote, pre');
+        const blockElements = this.renderedContainer.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, blockquote, pre');
 
         // Si el elemento clickeado es directamente un bloque, devolverlo
         if (clickedElement.matches('p, h1, h2, h3, h4, h5, h6, li, blockquote, pre')) {
@@ -396,6 +474,11 @@ export class Writer {
      * Coordina todas las operaciones de edición basadas en la tecla presionada
      */
     onPressKey = (event: KeyboardEvent): void => {
+        // Solo procesar eventos de teclado en la vista renderizada
+        if (this.viewManager.getCurrentMode() !== 'rendered') {
+            return;
+        }
+
         // Prevenir comportamiento por defecto del navegador
         event.preventDefault();
 
@@ -589,7 +672,7 @@ export class Writer {
      * Renderiza todo el contenido con el cursor en la posición correcta
      */
     private updateDisplay(): void {
-        updateDisplay(this.container, this.content, this.pointer);
+        updateDisplay(this.renderedContainer, this.content, this.pointer);
     }
 
     /**
@@ -659,7 +742,12 @@ export class Writer {
      * Convierte todo el documento a texto plano markdown
      */
     public getDocumentAsText(): string {
-        return this.content.map(block => this.blockToMarkdown(block)).join('\n');
+        // Si estamos en vista de texto plano, usar el contenido del editor plano
+        if (this.viewManager.getCurrentMode() === 'plain') {
+            return this.plainTextEditor.getContent();
+        }
+        // Si estamos en vista renderizada, convertir los bloques a markdown
+        return blocksToMarkdown(this.content);
     }
 
     /**

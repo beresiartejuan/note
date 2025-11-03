@@ -74,7 +74,15 @@ export async function downloadPDF(customName?: string): Promise<void> {
     const backgroundColor = getCurrentBackgroundColor();
     console.log({ id: crypto.randomUUID(), backgroundColor });
 
+    // Obtener el elemento #app para aplicar/quitar la clase
+    const appElement = document.querySelector<HTMLDivElement>("#app");
+
     try {
+        // Ocultar el cursor temporalmente
+        if (appElement) {
+            appElement.classList.add('hide-cursor');
+        }
+
         // Generar y descargar PDF usando html2pdf.js directamente del div #app
         await html2pdf().set({
             margin: 0,
@@ -90,11 +98,16 @@ export async function downloadPDF(customName?: string): Promise<void> {
                 orientation: "portrait",
             },
             enableLinks: true
-        }).from(document.querySelector<HTMLDivElement>("#app")!).save();
+        }).from(appElement!).save();
 
     } catch (error) {
         console.error('Error al generar PDF:', error);
         throw new Error('No se pudo generar el archivo PDF');
+    } finally {
+        // Asegurar que el cursor se vuelva a mostrar, incluso si hay error
+        if (appElement) {
+            appElement.classList.remove('hide-cursor');
+        }
     }
 }
 
